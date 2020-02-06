@@ -1,0 +1,26 @@
+{
+  "name": "com.cdreyfus.getmystats",
+  "version": "1.0.0",
+  "description": "Scrapper for Crashlitycs through Firebase",
+  "main": "crashlytics.js",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "puppeteer": "^2.1.1",
+    "puppeteer-extra": "^3.1.9",
+    "puppeteer-extra-plugin-stealth": "^2.4.9"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/cdreyfus/GetMyStats.git"
+  },
+  "author": "cdreyfus",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cdreyfus/GetMyStats/issues"
+  },
+  "homepage": "https://github.com/cdreyfus/GetMyStats#readme"
+}
