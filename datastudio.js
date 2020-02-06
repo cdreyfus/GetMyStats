@@ -1,15 +1,13 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+import puppeteer from 'puppeteer';
 
-const puppeteer= require('puppeteer');
-const datastudioUrl = process.env.DATA_STUDIO_URL;
+dotenv.config();
 
-getDataStudioScreenshot()
-
-function getDataStudioScreenshot() {
+export function getDataStudioScreenshot() {
   (async () => {
     const browser = await puppeteer.launch({headless: false});
     const page = await browser.newPage();
-    await page.goto(datastudioUrl, {
+    await page.goto(process.env.DATA_STUDIO_URL, {
     waitUntil: 'networkidle2'
     });
     await page.setViewport({ width: 1920, height: 1040 });
