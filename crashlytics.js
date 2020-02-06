@@ -20,19 +20,21 @@ puppeteer.launch({ headless: false }).then(async browser => {
 
   await page.waitForSelector('.recent-projects-header', { visible: true })
 
-  const appAdminPackage = process.env.APP_ADMIN
-  const url = "https://console.firebase.google.com/u/0/project/prod-b16ce/crashlytics/app/".concat(appAdminPackage).concat("/issues?state=open&time=last-seven-days&type=crash");
-  await page.goto(url, { waitUntil: 'networkidle2' });
+  var appsArray = [process.env.APP_MB, process.env.APP_MAIN, process.env.APP_CONTROL, process.env.APP_REGUL, process.env.APP_ADMIN]
+  for(app of appsArray){
+    const url = "https://console.firebase.google.com/u/0/project/prod-b16ce/crashlytics/app/".concat(app).concat("/issues?state=open&time=last-seven-days&type=crash");
+    console.log(url);
 
-  await page.waitForSelector("g.crashes > rect:nth-child(7)")
-  const result = await page.evaluate(() => {
-    let crashFreePercent = document.querySelector(".crash-free-users > .fire-stat > .ng-star-inserted > .value-wrapper > span").innerText
-    let usersAffected = document.querySelector(".stat.secondary > .fire-stat > .ng-star-inserted > .value-wrapper > span").innerText
-
-    return { crashFreePercent, usersAffected }
-  })
-
-  console.log(result);
-
+    await page.goto(url);
+    await page.waitForSelector("g.crashes > rect:nth-child(7)")
+    const result = await page.evaluate(() => {
+      let crashFreePercent = document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.crash-free-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > fire-stat > div > div:nth-child(3) > div > span").innerText
+      let usersAffected = document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.top-issues-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > div > fire-stat.stat.secondary > div > div:nth-child(2) > div.value-wrapper > span").innerText
+      return { crashFreePercent, usersAffected }
+    })
+    console.log(app);
+    
+    console.log(result);
+  }
   await browser.close();
 })
