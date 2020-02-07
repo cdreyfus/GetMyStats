@@ -1,5 +1,7 @@
 import { getDataStudioScreenshot } from './datastudio.js';
 import { getStats } from './crashlytics.js';
 
-getDataStudioScreenshot()
-getStats()
+//getDataStudioScreenshot()
+
+const statsMap = getStats()
+console.log(statsMap)
