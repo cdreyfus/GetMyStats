@@ -3,5 +3,4 @@ import { getStats } from './crashlytics.js';
 
 //getDataStudioScreenshot()
 
-const statsMap = getStats()
-console.log(statsMap)
+getStats().then(map => console.log(map));

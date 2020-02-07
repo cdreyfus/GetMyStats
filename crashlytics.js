@@ -6,7 +6,7 @@ dotenv.config();
 puppeteer.use(StealthPlugin())
 
 export async function getStats() {
-  let stats = puppeteer.launch({ headless: false }).then(async browser => {
+  return puppeteer.launch({ headless: false }).then(async browser => {
     const page = await browser.newPage();
     await page.goto("https://console.firebase.google.com/u/0/");
 
@@ -41,6 +41,5 @@ export async function getStats() {
     await browser.close();
     // console.log(map)
     return map
-  })
-  return stats
+  });
 }   
