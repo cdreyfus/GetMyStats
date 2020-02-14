@@ -12,7 +12,7 @@ const getDateMinusDays = (minusDays) => {
 }
 
 export async function getStats() {
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
 
   await page.goto("https://console.firebase.google.com/u/0/");
@@ -31,11 +31,7 @@ export async function getStats() {
 
   var appsArray = [process.env.APP_MB, process.env.APP_MAIN, process.env.APP_CONTROL, process.env.APP_REGUL, process.env.APP_ADMIN];
 
-<<<<<<< HEAD
-  const results = appsArray.reduce(async (prevMapPromise, app) => {
-=======
   const results = await appsArray.reduce(async (prevMapPromise, app) => {
->>>>>>> 213f8ba... foobar
     const prevMap = await prevMapPromise;
 
     const urlCrashlytics = "https://console.firebase.google.com/u/0/project/prod-b16ce/crashlytics/app/".concat(app);
@@ -45,25 +41,29 @@ export async function getStats() {
     await page.waitForSelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.crash-free-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > fire-stat > div > div:nth-child(3) > div > span", { visible: true })
     await page.waitForSelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.top-issues-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > div > fire-stat.stat.secondary > div > div:nth-child(2) > div.value-wrapper > span", { visible: true })
 
-    let crashFreePercent = await page.evaluate(() => document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.crash-free-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > fire-stat > div > div:nth-child(3) > div > span").textContent)
-    let usersAffected = await page.evaluate(() => document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.top-issues-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > div > fire-stat.stat.secondary > div > div:nth-child(2) > div.value-wrapper > span").textContent)
-
-    var lastWeekMonday = getDateMinusDays(14)
-    var lastWeekSunday = getDateMinusDays(8)
-
-    const urlCrashlyticsLastWeek = urlCrashlytics.concat("/issues?state=open&time=" + lastWeekMonday + ":" + lastWeekSunday + "&type=crash")
-
+    const resultLastWeek = await page.evaluate(() => {
+      let crashFreePercent = document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.crash-free-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > fire-stat > div > div:nth-child(3) > div > span").innerText
+      let usersAffected = document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.top-issues-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > div > fire-stat.stat.secondary > div > div:nth-child(2) > div.value-wrapper > span").innerText
+      return {crashFreePercent, usersAffected}
+    })
+   
+    const previousFirstDay = getDateMinusDays(14).getTime()
+    const previousLastDay = getDateMinusDays(8).getTime()
+    const urlCrashlyticsLastWeek = urlCrashlytics.concat("/issues?state=open&time=" + previousFirstDay + ":" + previousLastDay + "&type=crash")
     await page.goto(urlCrashlyticsLastWeek);
+
     await page.waitForSelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.crash-free-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > fire-stat > div > div:nth-child(3) > div > span", { visible: true })
+    await page.waitForSelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.top-issues-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > div > fire-stat.stat.secondary > div > div:nth-child(2) > div.value-wrapper > span", { visible: true })
+    const previousResults = await page.evaluate(() =>  {
+      let crashFreePercentPreviousWeek = document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.crash-free-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > fire-stat > div > div:nth-child(3) > div > span").innerText
+      let usersAffectedPreviousWeek = document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.top-issues-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > div > fire-stat.stat.secondary > div > div:nth-child(2) > div.value-wrapper > span").innerText
+      return {crashFreePercentPreviousWeek, usersAffectedPreviousWeek}
+    })
 
-    let crashFreePercentPreviousWeek = await page.evaluate(() => document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.crash-free-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > fire-stat > div > div:nth-child(3) > div > span").textContent)
-
-    prevMap.set(app, { crashFreePercent, usersAffected, crashFreePercentPreviousWeek });
+    prevMap.set(app, { resultLastWeek, previousResults });
     return prevMap;
   }, Promise.resolve(new Map()))
 
   await browser.close();
   return results
 }
-
-
