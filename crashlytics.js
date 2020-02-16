@@ -12,7 +12,7 @@ const getDateMinusDays = (minusDays) => {
 }
 
 export async function getStats() {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
 
   await page.goto("https://console.firebase.google.com/u/0/");
@@ -37,7 +37,11 @@ export async function getStats() {
     const urlCrashlytics = "https://console.firebase.google.com/u/0/project/prod-b16ce/crashlytics/app/".concat(app);
     const urlLastSevenDays = urlCrashlytics.concat("/issues?state=open&time=last-seven-days&type=crash");
 
+    const previousFirstDay = getDateMinusDays(14).getTime()
+    const previousLastDay = getDateMinusDays(8).getTime()
+
     await page.goto(urlLastSevenDays);
+
     await page.waitForSelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.crash-free-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > fire-stat > div > div:nth-child(3) > div > span", { visible: true })
     await page.waitForSelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.top-issues-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > div > fire-stat.stat.secondary > div > div:nth-child(2) > div.value-wrapper > span", { visible: true })
 
@@ -47,17 +51,15 @@ export async function getStats() {
       return {crashFreePercent, usersAffected}
     })
    
-    const previousFirstDay = getDateMinusDays(14).getTime()
-    const previousLastDay = getDateMinusDays(8).getTime()
     const urlCrashlyticsLastWeek = urlCrashlytics.concat("/issues?state=open&time=" + previousFirstDay + ":" + previousLastDay + "&type=crash")
     await page.goto(urlCrashlyticsLastWeek);
 
     await page.waitForSelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.crash-free-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > fire-stat > div > div:nth-child(3) > div > span", { visible: true })
     await page.waitForSelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.top-issues-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > div > fire-stat.stat.secondary > div > div:nth-child(2) > div.value-wrapper > span", { visible: true })
     const previousResults = await page.evaluate(() =>  {
-      let crashFreePercentPreviousWeek = document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.crash-free-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > fire-stat > div > div:nth-child(3) > div > span").innerText
-      let usersAffectedPreviousWeek = document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.top-issues-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > div > fire-stat.stat.secondary > div > div:nth-child(2) > div.value-wrapper > span").innerText
-      return {crashFreePercentPreviousWeek, usersAffectedPreviousWeek}
+      let crashFreePercent = document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.crash-free-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > fire-stat > div > div:nth-child(3) > div > span").innerText
+      let usersAffected = document.querySelector("#main > ng-transclude > div > div > div > c9s-issues > c9s-issues-index > div > div > div > c9s-issues-metrics > div > mat-card.top-issues-container.mat-card > div.c9s-issues-scalars.ng-star-inserted > div > fire-stat.stat.secondary > div > div:nth-child(2) > div.value-wrapper > span").innerText
+      return {crashFreePercent, usersAffected}
     })
 
     prevMap.set(app, { resultLastWeek, previousResults });
